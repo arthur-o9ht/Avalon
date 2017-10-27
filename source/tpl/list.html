@@ -1,0 +1,30 @@
+<html>
+<head>
+    <link href="https://apps.bdimg.com/libs/highlight.js/9.1.0/styles/paraiso-dark.min.css" rel="stylesheet">
+    <style type="text/css">
+        <!--
+        A { text-decoration: none}
+        -->
+    </style>
+</head>
+<body>
+<h1>Arthur about code & 42</h1>
+<hr>
+<h2>文章列表</h2>
+<br>
+<br>
+{{range .}}
+<a href="/doc?name={{.Name}}">
+    <span style="font-size: 26px;font-weight: bold;">"{{.Title}}"
+    </span>
+</a>
+<span style="font-size: 12px; color: #999;">&nbsp;&nbsp;&nbsp;{{.Date}}</span>
+<p style="font-size: 18px; color: #0b8568;">概要: {{.Summary}} ...</p>
+<div style="margin-bottom:10px; width: 30%; height: 2px; background-color: black;"></div>
+{{end}}
+<script src="http://apps.bdimg.com/libs/highlight.js/9.1.0/highlight.min.js"></script>
+<script>
+    hljs.initHighlightingOnLoad();
+</script>
+</body>
+</html>
