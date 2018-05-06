@@ -1,11 +1,11 @@
 package lib
 
 import (
-	"io/ioutil"
-	"strings"
 	"github.com/russross/blackfriday"
 	"html/template"
+	"io/ioutil"
 	"path/filepath"
+	"strings"
 )
 
 type Doc struct {
@@ -14,9 +14,8 @@ type Doc struct {
 	Summary string
 	Body    template.HTML
 	File    string
-	Name	string
+	Name    string
 }
-
 
 func GetDoc(name string) []Doc {
 	a := []Doc{}
@@ -35,8 +34,8 @@ func GetList() []Doc {
 	return a
 }
 
-func Md2Html(name string, docs []Doc) []Doc{
-	f := "source/mds/"+name+".md"
+func Md2Html(name string, docs []Doc) []Doc {
+	f := "source/mds/" + name + ".md"
 	fileRead, _ := ioutil.ReadFile(f)
 	lines := strings.Split(string(fileRead), "\n")
 	title := string(lines[0])

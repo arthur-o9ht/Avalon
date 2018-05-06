@@ -1,9 +1,9 @@
 package controller
 
 import (
-	"net/http"
-	"lib"
 	"html/template"
+	"lib"
+	"net/http"
 )
 
 func HandlerList(w http.ResponseWriter, r *http.Request) {

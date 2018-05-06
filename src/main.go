@@ -2,10 +2,10 @@ package main
 
 import (
 	"controller"
-	"github.com/martini"
+	"github.com/go-martini/martini"
 )
 
-func serverInit () {
+func serverInit() {
 	m := martini.Classic()
 	m.Group("/blog/", func(r martini.Router) {
 		r.Get("list", controller.HandlerList)
