@@ -1,7 +1,5 @@
+.idea/
 pkg/
 bin/
-.idea/*
-.idea/workspace.xml
-*.log.*
 .DS_Store
 *.yml
