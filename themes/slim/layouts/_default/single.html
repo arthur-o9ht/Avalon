@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  {{ partial "head.html" . }}
+  <style type="text/css">
+    .post-aside-div{
+      position: fixed;
+      top: 100px;
+      right: 0;
+      width: 20%;
+      -webkit-box-ordinal-group:3;
+      order:2;
+      box-sizing: border-box;
+    }
+    .post-aside{
+      font-size: .875rem;
+      padding-right: 1rem;
+      list-style-type: none;
+      list-style: none;
+      color: #0594cb;
+      text-decoration: none;
+      border-left-style: solid;
+      border-left-width: 1px;
+      border-color: #ccc;
+    }
+    ul{
+      list-style-type: none;
+      padding-left: 0.8rem;
+    }
+    li{
+      padding-left: 0.2rem;
+      line-height: 1.555;
+    }
+    a {
+      font-family: 'Source Sans Pro', 'Helvetica Neue', Helvetica, 'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei', 'WenQuanYi Micro Hei', Arial, Serif;
+
+      font-weight:400;
+      color: #7a7a7a;
+      text-decoration: none;
+    }
+  </style>
+</head>
+
+<body>
+  <div class="container">
+    {{ partial "header.html" . }}
+    <div class="content">
+      <div class="post">
+        <h2 class="post-title"><a href="{{ .Permalink }}">{{ .Title }}</a></h2>
+          <div class="post-aside-div">
+          <aside class="post-aside" id="TableOfContents">
+            {{ .TableOfContents }}
+          </aside> 
+          </div>
+        <div class="post-content">
+          {{ .Content }}
+        </div>
+      </div>
+    </div>
+    {{ partial "footer.html" . }}
+  </div>
+  <script src="{{ .Site.BaseURL }}js/slim.js"></script>
+  {{ with .Site.Params.AnalyticsID }}{{ partial "analytics.html" . }}{{ end }}
+
+</body>
+
+</html>
