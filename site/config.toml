@@ -1,0 +1,20 @@
+baseURL = "http://localhost:1313/"
+defaultContentLanguage = "zh-cn"
+title = "Even - A super concise theme for Hugo"
+theme = "slim"
+contentdir = "content"
+layoutdir = "themes/slim/layouts"
+publishdir = "public"
+builddrafts = false
+permalinks = "blog: /:year/:month/:title/"
+canonifyurls = true
+paginate=10
+paginatePath="page"
+[params]
+  Subtitle = "Your site's subtitle/tagline"
+  GithubID = "Your Github ID"
+  AnalyticsID = "Your Google Analytics tracking code"
+  Summary = true  # takes true or false
+  Content = false  # takes true or false
+[blackfridy]
+  extensions = "HTML_TOC"
