@@ -1,4 +1,4 @@
-baseURL = "http://localhost:1313/"
+baseURL = "http://localhost:3000/"
 defaultContentLanguage = "zh-cn"
 title = "Even - A super concise theme for Hugo"
 theme = "slim"
