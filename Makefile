@@ -1,6 +1,7 @@
 GOPATH:=$(CURDIR)
 export GOPATH
 
+
 all:build
 
 build:
