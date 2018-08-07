@@ -1,21 +1,21 @@
 <?xml version="1.0" encoding="utf-8" standalone="yes" ?>
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
   <channel>
-    <title>Even - A super concise theme for Hugo</title>
-    <link>http://localhost:3000/</link>
-    <description>Recent content on Even - A super concise theme for Hugo</description>
+    <title>Arthur &amp; Code &amp; 42</title>
+    <link>http://www.arthur-code-42.cc/</link>
+    <description>Recent content on Arthur &amp; Code &amp; 42</description>
     <generator>Hugo -- gohugo.io</generator>
     <lastBuildDate>Sun, 05 Aug 2018 23:50:24 +0800</lastBuildDate>
     
-	<atom:link href="http://localhost:3000/index.xml" rel="self" type="application/rss+xml" />
+	<atom:link href="http://www.arthur-code-42.cc/index.xml" rel="self" type="application/rss+xml" />
     
     
     <item>
       <title>Leetcode</title>
-      <link>http://localhost:3000/blog/leetcode/</link>
+      <link>http://www.arthur-code-42.cc/blog/leetcode/</link>
       <pubDate>Sun, 05 Aug 2018 23:50:24 +0800</pubDate>
       
-      <guid>http://localhost:3000/blog/leetcode/</guid>
+      <guid>http://www.arthur-code-42.cc/blog/leetcode/</guid>
       <description>&lt;h1 id=&#34;leetcode-record&#34;&gt;LeetCode Record&lt;/h1&gt;
 
 &lt;blockquote&gt;

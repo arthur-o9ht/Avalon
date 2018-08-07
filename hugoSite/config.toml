@@ -1,6 +1,6 @@
-baseURL = "http://localhost:3000/"
+baseURL = "http://www.arthur-code-42.cc/"
 defaultContentLanguage = "zh-cn"
-title = "Even - A super concise theme for Hugo"
+title = "Arthur & Code & 42"
 theme = "slim"
 contentdir = "content"
 layoutdir = "themes/slim/layouts"
@@ -11,10 +11,28 @@ canonifyurls = true
 paginate=10
 paginatePath="page"
 [params]
-  Subtitle = "Your site's subtitle/tagline"
-  GithubID = "Your Github ID"
-  AnalyticsID = "Your Google Analytics tracking code"
+  Subtitle = "记录代码、算法、架构和一切"
   Summary = true  # takes true or false
   Content = false  # takes true or false
-[blackfridy]
-  extensions = "HTML_TOC"
+  GithubID = "arthur"
+[[menu.main]]
+  name = "Coding"
+  weight = 1
+  url = "/"
+[[menu.main]]
+  name = "Reading"
+  weight = 2
+  url = "/"
+[[menu.main]]
+  name = "Recording"
+  weight = 3
+  url = "/"
+[[menu.main]]
+  name = "Cecording"
+  weight = 4
+  url = "/"
+
+[[menu.main]]
+  name = "About"
+  weight = 5
+  url = "/"
