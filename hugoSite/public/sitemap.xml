@@ -3,29 +3,40 @@
   xmlns:xhtml="http://www.w3.org/1999/xhtml">
   
   <url>
-    <loc>http://www.arthur-code-42.cc/blog/leetcode/</loc>
+    <loc>http://127.0.0.1:8080/reading/goroutine/</loc>
+    <lastmod>2018-08-10T11:57:22+08:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>http://127.0.0.1:8080/blog/leetcode/</loc>
     <lastmod>2018-08-05T23:50:24+08:00</lastmod>
   </url>
   
   <url>
-    <loc>http://www.arthur-code-42.cc/</loc>
+    <loc>http://127.0.0.1:8080/</loc>
+    <lastmod>2018-08-10T11:57:22+08:00</lastmod>
+    <priority>0</priority>
+  </url>
+  
+  <url>
+    <loc>http://127.0.0.1:8080/blog/</loc>
     <lastmod>2018-08-05T23:50:24+08:00</lastmod>
     <priority>0</priority>
   </url>
   
   <url>
-    <loc>http://www.arthur-code-42.cc/blog/</loc>
-    <lastmod>2018-08-05T23:50:24+08:00</lastmod>
+    <loc>http://127.0.0.1:8080/categories/</loc>
     <priority>0</priority>
   </url>
   
   <url>
-    <loc>http://www.arthur-code-42.cc/categories/</loc>
+    <loc>http://127.0.0.1:8080/reading/</loc>
+    <lastmod>2018-08-10T11:57:22+08:00</lastmod>
     <priority>0</priority>
   </url>
   
   <url>
-    <loc>http://www.arthur-code-42.cc/tags/</loc>
+    <loc>http://127.0.0.1:8080/tags/</loc>
     <priority>0</priority>
   </url>
   

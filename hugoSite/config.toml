@@ -1,6 +1,7 @@
 baseURL = "http://www.arthur-code-42.cc/"
+#baseUrl = "http://127.0.0.1:8080/"
 defaultContentLanguage = "zh-cn"
-title = "Arthur & Code & 42"
+title = "Avalon::致遥远的理想乡"
 theme = "slim"
 contentdir = "content"
 layoutdir = "themes/slim/layouts"
@@ -11,28 +12,24 @@ canonifyurls = true
 paginate=10
 paginatePath="page"
 [params]
-  Subtitle = "记录代码、算法、架构和一切"
+  Subtitle = "记录代码、算法、架构和42"
   Summary = true  # takes true or false
   Content = false  # takes true or false
-  GithubID = "arthur"
+  GithubID = "arthur-o9ht"
 [[menu.main]]
   name = "Coding"
   weight = 1
-  url = "/"
+  url = "/coding/"
 [[menu.main]]
   name = "Reading"
   weight = 2
-  url = "/"
+  url = "/reading"
 [[menu.main]]
   name = "Recording"
   weight = 3
-  url = "/"
-[[menu.main]]
-  name = "Cecording"
-  weight = 4
   url = "/"
 
 [[menu.main]]
   name = "About"
   weight = 5
-  url = "/"
+  url = "/about.html"
