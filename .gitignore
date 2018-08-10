@@ -3,3 +3,4 @@ pkg/
 bin/
 .DS_Store
 *.yml
+.hugoSite/public/
