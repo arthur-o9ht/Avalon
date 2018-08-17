@@ -7,7 +7,7 @@ contentdir = "content"
 layoutdir = "themes/slim/layouts"
 publishdir = "public"
 builddrafts = false
-permalinks = "blog: /:year/:month/:title/"
+#permalinks = "blog: /:year/:month/:title/"
 canonifyurls = true
 paginate=10
 paginatePath="page"
@@ -16,20 +16,20 @@ paginatePath="page"
   Summary = true  # takes true or false
   Content = false  # takes true or false
   GithubID = "arthur-o9ht"
+#[[menu.main]]
+#  name = "Coding"
+#  weight = 1
+#  url = "/coding/"
 [[menu.main]]
-  name = "Coding"
-  weight = 1
-  url = "/coding/"
-[[menu.main]]
-  name = "Reading"
+  name = "读书笔记"
   weight = 2
   url = "/reading"
 [[menu.main]]
-  name = "Recording"
+  name = "算法"
   weight = 3
   url = "/"
 
-[[menu.main]]
-  name = "About"
-  weight = 5
-  url = "/about.html"
+#[[menu.main]]
+#  name = "About"
+#  weight = 5
+#  url = "/about.html"

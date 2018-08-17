@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes" ?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>Readings on Avalon::致遥远的理想乡</title>
+    <link>http://127.0.0.1:8080/reading/</link>
+    <description>Recent content in Readings on Avalon::致遥远的理想乡</description>
+    <generator>Hugo -- gohugo.io</generator>
+    <lastBuildDate>Fri, 17 Aug 2018 17:37:22 +0800</lastBuildDate>
+    
+	<atom:link href="http://127.0.0.1:8080/reading/index.xml" rel="self" type="application/rss+xml" />
+    
+    
+    <item>
+      <title>Go语言学习笔记 -- 第5章 数据</title>
+      <link>http://127.0.0.1:8080/reading/golang-5/</link>
+      <pubDate>Fri, 17 Aug 2018 17:37:22 +0800</pubDate>
+      
+      <guid>http://127.0.0.1:8080/reading/golang-5/</guid>
+      <description>&lt;p&gt;本章主要描述go语言中常用的几种数据类型的相关结构或需要注意的点  &lt;/p&gt;</description>
+    </item>
+    
+    <item>
+      <title>Go语言学习笔记 -- 第18章 Go并发调度</title>
+      <link>http://127.0.0.1:8080/reading/golang-18/</link>
+      <pubDate>Fri, 10 Aug 2018 11:57:22 +0800</pubDate>
+      
+      <guid>http://127.0.0.1:8080/reading/golang-18/</guid>
+      <description>&lt;p&gt;本章主要描述go语言在并发启用goroutine时，go调度器的运行机制 &lt;/p&gt;</description>
+    </item>
+    
+  </channel>
+</rss>

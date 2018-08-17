@@ -1,0 +1,331 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <meta http-equiv="content-type" content="text/html; charset=utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1">
+<title> Go语言学习笔记 -- 第5章 数据 &middot; Avalon::致遥远的理想乡 </title>
+
+
+<link rel="stylesheet" href="http://127.0.0.1:8080/css/slim.css">
+<link rel="stylesheet" href="http://127.0.0.1:8080/css/highlight.min.css">
+<link href='https://fonts.googleapis.com/css?family=Source+Sans+Pro:400,700|Source+Code+Pro' rel='stylesheet' type='text/css'>
+
+<link rel="apple-touch-icon-precomposed" sizes="144x144" href="http://127.0.0.1:8080/apple-touch-icon-144-precomposed.png">
+<link rel="shortcut icon" href="http://127.0.0.1:8080/favicon.ico">
+
+
+<link href="" rel="alternate" type="application/rss+xml" title="Avalon::致遥远的理想乡" />
+
+  <style type="text/css">
+    .post-aside-div{
+      position: fixed;
+      top: 100px;
+      right: 0;
+      width: 20%;
+      -webkit-box-ordinal-group:3;
+      order:2;
+      box-sizing: border-box;
+    }
+    .post-aside{
+      font-size: .875rem;
+      padding-right: 1rem;
+      list-style-type: none;
+      list-style: none;
+      color: #0594cb;
+      text-decoration: none;
+      border-left-style: solid;
+      border-left-width: 1px;
+      border-color: #ccc;
+    }
+    ul{
+      list-style-type: none;
+      padding-left: 0.8rem;
+    }
+    li{
+      padding-left: 0.2rem;
+      line-height: 1.555;
+    }
+    a {
+      font-family: 'Source Sans Pro', 'Helvetica Neue', Helvetica, 'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei', 'WenQuanYi Micro Hei', Arial, Serif;
+
+      font-weight:400;
+      color: #7a7a7a;
+      text-decoration: none;
+    }
+  </style>
+</head>
+
+<body>
+  <div class="container">
+    <div class="header">
+  <h1 class="site-title"><a href="http://127.0.0.1:8080/">Avalon::致遥远的理想乡</a></h1>
+  <p class="site-tagline">记录代码、算法、架构和42</p>
+  <div class="nav">
+    <a class="nav-btn" href="#">
+      <span class="ci ci-burger"></span>
+    </a>
+    <ul class="nav-list">
+      
+      <li><a href="http://127.0.0.1:8080/reading">读书笔记</a></li>
+      
+      <li><a href="http://127.0.0.1:8080/">算法</a></li>
+       
+	  <li class="spacer">&ac;</li>
+
+      <li><a href="https://github.com/arthur-o9ht">Github</a></li>  
+    </ul>
+  </div>
+</div>
+    <div class="content">
+      <div class="post">
+        <h2 class="post-title"><a href="http://127.0.0.1:8080/reading/golang-5/">Go语言学习笔记 -- 第5章 数据</a></h2>
+          <div class="post-aside-div">
+          <aside class="post-aside" id="TableOfContents">
+            <nav id="TableOfContents">
+<ul>
+<li>
+<ul>
+<li>
+<ul>
+<li><a href="#5-1-字符串">5.1 字符串</a></li>
+<li><a href="#5-2-数组">5.2 数组</a></li>
+<li><a href="#5-3-切片">5.3 切片</a></li>
+<li><a href="#5-4-字典">5.4 字典</a></li>
+<li><a href="#5-5-结构">5.5 结构</a></li>
+</ul></li>
+</ul></li>
+</ul>
+</nav>
+          </aside> 
+          </div>
+        <div class="post-content">
+          <p>本章主要描述go语言中常用的几种数据类型的相关结构或需要注意的点  </p>
+
+<h3 id="5-1-字符串">5.1 字符串</h3>
+
+<p><strong>结构位置</strong> ：</p>
+
+<blockquote>
+<p>go/src/runtime/string.go</p>
+</blockquote>
+
+<p><strong>定义</strong>：</p>
+
+<pre><code class="language-go">type stringStruct struct {
+	str unsafe.Pointer
+	len int
+}
+</code></pre>
+
+<p>字符串是不可变字节序列(byte)，本身是一个符合结构
+头部指针指向字节数组，没有null结尾</p>
+
+<p><strong>知识点Tips</strong>：</p>
+
+<blockquote>
+<p>1 默认值不是nil，是“”</p>
+
+<p>2 使用“`”定义为不做转义处理的原始字符，所见即所得。支持跨行</p>
+
+<p>3 支持运算符</p>
+
+<p>4 允许索引号访问字节数组，但是不能获取元素地址</p>
+
+<p>5 以切片语法[x:y]返回子串时，其内部仍然指向的是原自己数组</p>
+
+<p>6 如果需要修改字符串，可以先将字符传转为[]byte，修改后再转换回来，但是不论怎么转化，都需要重新分配内存，并复制数据</p>
+
+<p>7 如果需要转换字符串时，在并发较高的情况下，可以使用unsafe的方式，代码如下</p>
+</blockquote>
+
+<pre><code class="language-go">	func toString(bs []byte) string {
+			return *(*string)(unsafe.Pointer(&amp;bs))
+	}
+</code></pre>
+
+<h3 id="5-2-数组">5.2 数组</h3>
+
+<p>go中数组为内置类型，和string 或者 slice 这种复合型结构类型不一样，同时长度也是数组的类型中的一部分。</p>
+
+<p><strong>知识点Tips</strong></p>
+
+<blockquote>
+<p>1 初始化方式多样</p>
+
+<pre><code class="language-go">	var a[4]int //元素自动初始化为0
+	b := [4]int{2,4} //为提供初始值的元素自动化为0
+	c :=[...]int{1,2,3} //默认根据后面数组长度来初始化
+	d := [...]int{1, 2:100} 输出[1, 0 , 100]，可以根据索引初始化
+</code></pre>
+
+<p>2 多维数组只有第一维度允许使用&hellip;</p>
+
+<p>3 可以获取任意元素的地址</p>
+
+<p>4 数组指针可以用来操作元素</p>
+</blockquote>
+
+<h3 id="5-3-切片">5.3 切片</h3>
+
+<p><strong>结构位置</strong></p>
+
+<blockquote>
+<p>go/src/runtime/slice.go</p>
+</blockquote>
+
+<p><strong>代码</strong></p>
+
+<pre><code class="language-go">type slice struct {
+	array unsafe.Pointer
+	len   int
+	cap   int
+}
+</code></pre>
+
+<p>切片本身是只读的，其工作机制更类似于数组指针的一种包装</p>
+
+<p><strong>知识点Tips</strong></p>
+
+<blockquote>
+<p>1 当截取切片并赋值给新的变量的时候，新的切片容量分两种：</p>
+</blockquote>
+
+<pre><code class="language-go">	 1. 截取方式为 b:=a[x:y]，则len(b) = y-x , cap(b) = cap(a)-x
+	 2. 截取方式为 b:=a[x:y:z]，则 len(b) = y-x , cap(b) = z-x
+</code></pre>
+
+<blockquote>
+<p>2 截取切片后赋值，新的切片与旧切片中的array 字段指向同一个地址，这个地址是同一个array，代码如下</p>
+</blockquote>
+
+<pre><code class="language-go">	a := []int{1, 2, 3}
+	b := a[0:1]
+	fmt.Printf(&quot;a : %#v\n&quot;, (*reflect.SliceHeader)(unsafe.Pointer(&amp;a)).Data) // a : 0xc420098000
+	fmt.Printf(&quot;b : %#v\n&quot;, (*reflect.SliceHeader)(unsafe.Pointer(&amp;b)).Data) //b : 0xc420098000
+	fmt.Printf(&quot;a: %v;b: %v\n&quot;, a, b) //a: [1 2 3];b: [1]
+	a[0] = 4
+	fmt.Printf(&quot;a: %v;b: %v\n&quot;, a, b) //a: [4 2 3];b: [4]
+</code></pre>
+
+<blockquote>
+<p>3 通过切片的reslice操作，可以很方便的实现栈，队列等结构</p>
+
+<p>4 copy操作是值拷贝，所以当有某些情况是长时间引用大数组中的很小的片段时，可以采用新建独立切片，copy出所需数据，方便大数组进入垃圾回收</p>
+</blockquote>
+
+<h3 id="5-4-字典">5.4 字典</h3>
+
+<p>字典也属于内置类型</p>
+
+<p><strong>知识点Tips</strong></p>
+
+<blockquote>
+<p>1 当访问不存在的键时，不会报错，返回0值，所以在建议在取值时 使用 v, ok := M[&ldquo;key&rdquo;]的方式来使用，可以通过ok来判断是否存在，而避免本身就存0的情况</p>
+
+<p>2 map被设置为not addressable，所以不能使用如下方式修改属性，</p>
+</blockquote>
+
+<pre><code class="language-go">	type user struct {
+		name string 
+	 	age int 
+	}
+	
+	m := map[int]user{
+		1:{&quot;TOM&quot;, 12},
+	}
+
+	m[1].age++ //error
+//可以使用下面的方式
+	v:=m[1] 
+	v.age++ 
+	m[1] = v 
+//或者
+	m2 := map[int]*user{1:{&quot;TOM&quot;, 12}}
+	m2[1].age++
+</code></pre>
+
+<blockquote>
+<p>3 非协程安全，所以在一个协程读的时候，另一个协程进行写操作的话，程序崩溃；可以用go run -race test.go来进行检测，发现后对map加上锁（sync.Mutex{} 或者 sync.RWMutex{}）来解决这个问题，或者使用 sync.Map 来解决</p>
+
+<p>4 map本身就是指针包装，传参时，不用再次取地址</p>
+</blockquote>
+
+<h3 id="5-5-结构">5.5 结构</h3>
+
+<p>结构在go中属于复合类型</p>
+
+<blockquote>
+<p>1 定义匿名结构变量</p>
+</blockquote>
+
+<pre><code class="language-go">func main() {
+	u := struct{
+		name string
+		age int
+	}{
+		name : &quot;arthur&quot;,
+		age :18,
+	}
+//或者
+	type file struct {
+		name string
+		attr struct {
+			owner int 
+			perm int
+		}
+	}
+	f := file{
+		name: &quot;test&quot;,
+		attr: struct {
+			owner int
+			perm  int
+		}{owner: 123, perm: 123},
+	}
+}
+</code></pre>
+
+<blockquote>
+<p>2 曾经在1.5版本时，第二种方式中，可以在初始化语句中再次定义之前定义过的匿名结构，但是目前已经移除该规则只能有上面两种实现方式</p>
+
+<p>3 空结构是指没有字段的结构类型，无论自身还是作为数组元素类型，长度均为0</p>
+
+<p>4 字段标签，tag并不是注释，而是对字段进行描述的元数据。不是成员，但是是组成部分</p>
+</blockquote>
+
+<pre><code class="language-go">
+type user struct {
+	name string `姓名`
+	age  int    `年龄`
+}
+func main () {
+	u := user{&quot;Tom&quot;, 12}
+	v := reflect.ValueOf(u)
+	t := v.Type()
+
+	for i, n := 0, t.NumField(); i &lt; n; i++ {
+		fmt.Printf(&quot;%s, %v \n&quot;, t.Field(i).Tag, v.Field(i))
+	}
+}
+
+//输出
+//姓名, Tom 
+//年龄, 12 
+
+</code></pre>
+        </div>
+      </div>
+    </div>
+    <div class="footer">
+  
+  <p>Powered by <a href="http://gohugo.io">Hugo</a>. This theme—Slim—is open sourced on <a href="https://github.com/zhe/hugo-theme-slim">Github</a>.</p>
+  
+</div>
+
+  </div>
+  <script src="http://127.0.0.1:8080/js/slim.js"></script>
+  
+
+</body>
+
+</html>

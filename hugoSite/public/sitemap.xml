@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes" ?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"
+  xmlns:xhtml="http://www.w3.org/1999/xhtml">
+  
+  <url>
+    <loc>http://127.0.0.1:8080/reading/golang-5/</loc>
+    <lastmod>2018-08-17T17:37:22+08:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>http://127.0.0.1:8080/reading/golang-18/</loc>
+    <lastmod>2018-08-10T11:57:22+08:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>http://127.0.0.1:8080/blog/leetcode/</loc>
+    <lastmod>2018-08-05T23:50:24+08:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>http://127.0.0.1:8080/</loc>
+    <lastmod>2018-08-17T17:37:22+08:00</lastmod>
+    <priority>0</priority>
+  </url>
+  
+  <url>
+    <loc>http://127.0.0.1:8080/blog/</loc>
+    <lastmod>2018-08-05T23:50:24+08:00</lastmod>
+    <priority>0</priority>
+  </url>
+  
+  <url>
+    <loc>http://127.0.0.1:8080/categories/</loc>
+    <priority>0</priority>
+  </url>
+  
+  <url>
+    <loc>http://127.0.0.1:8080/reading/</loc>
+    <lastmod>2018-08-17T17:37:22+08:00</lastmod>
+    <priority>0</priority>
+  </url>
+  
+  <url>
+    <loc>http://127.0.0.1:8080/tags/</loc>
+    <priority>0</priority>
+  </url>
+  
+</urlset>
