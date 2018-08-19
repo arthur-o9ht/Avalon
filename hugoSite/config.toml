@@ -27,7 +27,7 @@ paginatePath="page"
 [[menu.main]]
   name = "算法"
   weight = 3
-  url = "/"
+  url = "/arithmetic"
 
 #[[menu.main]]
 #  name = "About"
