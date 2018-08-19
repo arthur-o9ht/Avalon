@@ -3,40 +3,24 @@
   xmlns:xhtml="http://www.w3.org/1999/xhtml">
   
   <url>
-    <loc>http://www.arthur-code-42.cc/reading/golang-5/</loc>
-    <lastmod>2018-08-17T17:37:22+08:00</lastmod>
-  </url>
-  
-  <url>
-    <loc>http://www.arthur-code-42.cc/reading/golang-18/</loc>
-    <lastmod>2018-08-10T11:57:22+08:00</lastmod>
-  </url>
-  
-  <url>
-    <loc>http://www.arthur-code-42.cc/blog/leetcode/</loc>
+    <loc>http://www.arthur-code-42.cc/arithmetic/leetcode/</loc>
     <lastmod>2018-08-05T23:50:24+08:00</lastmod>
   </url>
   
   <url>
-    <loc>http://www.arthur-code-42.cc/</loc>
-    <lastmod>2018-08-17T17:37:22+08:00</lastmod>
+    <loc>http://www.arthur-code-42.cc/arithmetic/</loc>
+    <lastmod>2018-08-05T23:50:24+08:00</lastmod>
     <priority>0</priority>
   </url>
   
   <url>
-    <loc>http://www.arthur-code-42.cc/blog/</loc>
+    <loc>http://www.arthur-code-42.cc/</loc>
     <lastmod>2018-08-05T23:50:24+08:00</lastmod>
     <priority>0</priority>
   </url>
   
   <url>
     <loc>http://www.arthur-code-42.cc/categories/</loc>
-    <priority>0</priority>
-  </url>
-  
-  <url>
-    <loc>http://www.arthur-code-42.cc/reading/</loc>
-    <lastmod>2018-08-17T17:37:22+08:00</lastmod>
     <priority>0</priority>
   </url>
   
