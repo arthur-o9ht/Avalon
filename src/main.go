@@ -10,7 +10,7 @@ var port string
 
 func init(){
 	name,_ := os.Hostname()
-	if name == "ArthurdeMacBook-Pro.local" {
+	if name == "ArthurdeMacBook-Pro.local" || name == "bogon"{
 		port = ":8080"
 	}else{
 		port = ":80"
