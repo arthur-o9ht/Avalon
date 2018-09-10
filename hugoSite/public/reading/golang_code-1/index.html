@@ -1,0 +1,727 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <meta http-equiv="content-type" content="text/html; charset=utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1">
+<title> GO源码记录-1.Go调度器 &middot; Avalon::致遥远的理想乡 </title>
+
+
+<link rel="stylesheet" href="http://www.arthur-code-42.cc/css/slim.css">
+<link rel="stylesheet" href="http://www.arthur-code-42.cc/css/highlight.min.css">
+<link href='https://fonts.googleapis.com/css?family=Source+Sans+Pro:400,700|Source+Code+Pro' rel='stylesheet' type='text/css'>
+
+<link rel="apple-touch-icon-precomposed" sizes="144x144" href="http://www.arthur-code-42.cc/apple-touch-icon-144-precomposed.png">
+<link rel="shortcut icon" href="http://www.arthur-code-42.cc/favicon.ico">
+
+
+<link href="" rel="alternate" type="application/rss+xml" title="Avalon::致遥远的理想乡" />
+
+  <style type="text/css">
+    .post-aside-div{
+      position: fixed;
+      top: 100px;
+      right: 0;
+      width: 20%;
+      -webkit-box-ordinal-group:3;
+      order:2;
+      box-sizing: border-box;
+    }
+    .post-aside{
+      font-size: .875rem;
+      padding-right: 1rem;
+      list-style-type: none;
+      list-style: none;
+      color: #0594cb;
+      text-decoration: none;
+      border-left-style: solid;
+      border-left-width: 1px;
+      border-color: #ccc;
+    }
+    ul{
+      list-style-type: none;
+      padding-left: 0.8rem;
+    }
+    li{
+      padding-left: 0.2rem;
+      line-height: 1.555;
+    }
+    a {
+      font-family: 'Source Sans Pro', 'Helvetica Neue', Helvetica, 'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei', 'WenQuanYi Micro Hei', Arial, Serif;
+
+      font-weight:400;
+      color: #7a7a7a;
+      text-decoration: none;
+    }
+  </style>
+</head>
+
+<body>
+  <div class="container">
+    <div class="header">
+  <h1 class="site-title"><a href="http://www.arthur-code-42.cc/">Avalon::致遥远的理想乡</a></h1>
+  <p class="site-tagline">记录代码、算法、架构和42</p>
+  <div class="nav">
+    <a class="nav-btn" href="#">
+      <span class="ci ci-burger"></span>
+    </a>
+    <ul class="nav-list">
+      
+      <li><a href="http://www.arthur-code-42.cc/reading">读书笔记</a></li>
+      
+      <li><a href="http://www.arthur-code-42.cc/arithmetic">算法</a></li>
+       
+	  <li class="spacer">&ac;</li>
+
+      <li><a href="https://github.com/arthur-o9ht">Github</a></li>  
+    </ul>
+  </div>
+</div>
+    <div class="content">
+      <div class="post">
+        <h2 class="post-title"><a href="http://www.arthur-code-42.cc/reading/golang_code-1/">GO源码记录-1.Go调度器</a></h2>
+          <div class="post-aside-div">
+          <aside class="post-aside" id="TableOfContents">
+            <nav id="TableOfContents">
+<ul>
+<li>
+<ul>
+<li>
+<ul>
+<li><a href="#go源码记录-1-go调度器">GO源码记录-1.Go调度器</a></li>
+<li><a href="#1-m-p-g-各自的结构体">1. M P G 各自的结构体</a>
+<ul>
+<li><a href="#m-的结构"><strong>M</strong>的结构:</a></li>
+<li><a href="#p-的结构"><strong>P</strong>的结构:</a></li>
+<li><a href="#g-的结构"><strong>G</strong>的结构:</a></li>
+</ul></li>
+<li><a href="#2-m-p-g-是如何跑起来的-代码层面">2. M P G 是如何跑起来的 （代码层面）</a>
+<ul>
+<li><a href="#1-初始化">1. 初始化</a></li>
+<li><a href="#2-schedinit-初始化">2. schedinit 初始化</a></li>
+<li><a href="#3-通过procresize函数来初始化p">3. 通过procresize函数来初始化P</a></li>
+<li><a href="#4-创建g">4. 创建G</a></li>
+<li><a href="#6-放入p队列执行">6. 放入p队列执行</a></li>
+<li><a href="#7-当使用了newproc1-创建了g对象之后-会使用wakep唤醒m来真正的执行">7. 当使用了newproc1 创建了G对象之后，会使用wakep唤醒M来真正的执行</a></li>
+<li><a href="#8-当m在各种可能的场合都无法获取到g时-或者任务用时过长-系统调用阻塞等原因被剥夺p时-m进入休眠">8. 当m在各种可能的场合都无法获取到g时，或者任务用时过长，系统调用阻塞等原因被剥夺p时，m进入休眠。</a></li>
+</ul></li>
+</ul></li>
+</ul></li>
+</ul>
+</nav>
+          </aside> 
+          </div>
+        <div class="post-content">
+          <p>这个系列主要记录代码层面相关内容</p>
+
+<h3 id="go源码记录-1-go调度器">GO源码记录-1.Go调度器</h3>
+
+<p>Go底层的MPG调度模型是Go提供协程处理的关键，这里对调度器相关内容源码进行记录和分析</p>
+
+<h3 id="1-m-p-g-各自的结构体">1. M P G 各自的结构体</h3>
+
+<h4 id="m-的结构"><strong>M</strong>的结构:</h4>
+
+<ol>
+<li><p>所在位置：src/runtime/runtime2.go  line：402</p></li>
+
+<li><p>具体代码：</p></li>
+</ol>
+
+<pre><code class="language-go">type m struct {
+	g0      *g     // goroutine with scheduling stack
+	morebuf gobuf  // gobuf arg to morestack
+	divmod  uint32 // div/mod denominator for arm - known to liblink
+
+	// Fields not known to debuggers.
+	procid        uint64       // for debuggers, but offset not hard-coded
+	gsignal       *g           // signal-handling g
+	goSigStack    gsignalStack // Go-allocated signal handling stack
+	sigmask       sigset       // storage for saved signal mask
+	tls           [6]uintptr   // thread-local storage (for x86 extern register)
+	mstartfn      func() 
+	curg          *g       // current running goroutine
+	caughtsig     guintptr // goroutine running during fatal signal
+	p             puintptr // attached p for executing go code (nil if not executing go code)
+	nextp         puintptr
+	id            int64
+	mallocing     int32
+	throwing      int32
+	preemptoff    string // if != &quot;&quot;, keep curg running on this m
+	locks         int32
+	softfloat     int32
+	dying         int32
+	profilehz     int32
+	helpgc        int32
+	spinning      bool // m is out of work and is actively looking for work
+	blocked       bool // m is blocked on a note
+	inwb          bool // m is executing a write barrier
+	newSigstack   bool // minit on C thread called sigaltstack
+	printlock     int8
+	incgo         bool   // m is executing a cgo call
+	freeWait      uint32 // if == 0, safe to free g0 and delete m (atomic)
+	fastrand      [2]uint32
+	needextram    bool
+	traceback     uint8
+	ncgocall      uint64      // number of cgo calls in total
+	ncgo          int32       // number of cgo calls currently in progress
+	cgoCallersUse uint32      // if non-zero, cgoCallers in use temporarily
+	cgoCallers    *cgoCallers // cgo traceback if crashing in cgo call
+	park          note
+	alllink       *m // on allm
+	schedlink     muintptr
+	mcache        *mcache
+	lockedg       guintptr
+	createstack   [32]uintptr    // stack that created this thread.
+	freglo        [16]uint32     // d[i] lsb and f[i]
+	freghi        [16]uint32     // d[i] msb and f[i+16]
+	fflag         uint32         // floating point compare flags
+	lockedExt     uint32         // tracking for external LockOSThread
+	lockedInt     uint32         // tracking for internal lockOSThread
+	nextwaitm     muintptr       // next m waiting for lock
+	waitunlockf   unsafe.Pointer // todo go func(*g, unsafe.pointer) bool
+	waitlock      unsafe.Pointer
+	waittraceev   byte
+	waittraceskip int
+	startingtrace bool
+	syscalltick   uint32
+	thread        uintptr // thread handle
+	freelink      *m      // on sched.freem
+
+	// these are here because they are too large to be on the stack
+	// of low-level NOSPLIT functions.
+	libcall   libcall
+	libcallpc uintptr // for cpu profiler
+	libcallsp uintptr
+	libcallg  guintptr
+	syscall   libcall // stores syscall parameters on windows
+	mOS
+}
+</code></pre>
+
+<h4 id="p-的结构"><strong>P</strong>的结构:</h4>
+
+<ol>
+<li><p>所在位置：src/runtime/runtime2.go  line：473</p></li>
+
+<li><p>具体代码：</p></li>
+</ol>
+
+<pre><code class="language-go">type p struct {
+	lock mutex
+
+	id          int32
+	status      uint32 // one of pidle/prunning/...
+	link        puintptr
+	schedtick   uint32     // incremented on every scheduler call
+	syscalltick uint32     // incremented on every system call
+	sysmontick  sysmontick // last tick observed by sysmon
+	m           muintptr   // back-link to associated m (nil if idle)
+	mcache      *mcache
+	racectx     uintptr
+	deferpool    [5][]*_defer // pool of available defer structs of different sizes (see panic.go)
+	deferpoolbuf [5][32]*_defer	// Cache of goroutine ids, amortizes accesses to runtime·sched.goidgen.
+	goidcache    uint64
+	goidcacheend uint64
+	// Queue of runnable goroutines. Accessed without lock.
+	runqhead uint32
+	runqtail uint32
+	runq     [256]guintptr
+	runnext guintptr
+	// Available G's (status == Gdead)
+	gfree    *g
+	gfreecnt int32
+	sudogcache []*sudog
+	sudogbuf   [128]*sudog
+	tracebuf traceBufPtr
+	traceSweep bool
+	traceSwept, traceReclaimed uintptr
+	palloc persistentAlloc // per-P to avoid mutex
+	// Per-P GC state
+	gcAssistTime         int64 // Nanoseconds in assistAlloc
+	gcFractionalMarkTime int64 // Nanoseconds in fractional mark worker
+	gcBgMarkWorker       guintptr
+	gcMarkWorkerMode     gcMarkWorkerMode
+	// gcMarkWorkerStartTime is the nanotime() at which this mark worker started.
+	gcMarkWorkerStartTime int64
+	gcw gcWork
+	wbBuf wbBuf
+	runSafePointFn uint32 // if 1, run sched.safePointFn at next safe point
+	pad [sys.CacheLineSize]byte
+}
+
+</code></pre>
+
+<h4 id="g-的结构"><strong>G</strong>的结构:</h4>
+
+<ol>
+<li><p>所在位置：src/runtime/runtime2.go  line：338</p></li>
+
+<li><p>具体代码：</p></li>
+</ol>
+
+<pre><code class="language-go">type g struct {
+	stack       stack   // 执行栈
+	stackguard0 uintptr // offset known to liblink
+	stackguard1 uintptr // offset known to liblink
+
+	_panic         *_panic // innermost panic - offset known to liblink
+	_defer         *_defer // innermost defer
+	m              *m      // current m; offset known to arm liblink
+	sched          gobuf  //用于保存现场数据
+	syscallsp      uintptr        // if status==Gsyscall, syscallsp = sched.sp to use during gc
+	syscallpc      uintptr        // if status==Gsyscall, syscallpc = sched.pc to use during gc
+	stktopsp       uintptr        // expected sp at top of stack, to check in traceback
+	param          unsafe.Pointer // passed parameter on wakeup
+	atomicstatus   uint32
+	stackLock      uint32 // sigprof/scang lock; TODO: fold in to atomicstatus
+	goid           int64 //唯一序号
+	waitsince      int64  // approx time when the g become blocked
+	waitreason     string // if status==Gwaiting
+	schedlink      guintptr
+	preempt        bool     // preemption signal, duplicates stackguard0 = stackpreempt
+	paniconfault   bool     // panic (instead of crash) on unexpected fault address
+	preemptscan    bool     // preempted g does scan for gc
+	gcscandone     bool     // g has scanned stack; protected by _Gscan bit in status
+	gcscanvalid    bool     // false at start of gc cycle, true if G has not run since last scan; TODO: remove?
+	throwsplit     bool     // must not split stack
+	raceignore     int8     // ignore race detection events
+	sysblocktraced bool     // StartTrace has emitted EvGoInSyscall about this goroutine
+	sysexitticks   int64    // cputicks when syscall has returned (for tracing)
+	traceseq       uint64   // trace event sequencer
+	tracelastp     puintptr // last P emitted an event for this goroutine
+	lockedm        muintptr
+	sig            uint32
+	writebuf       []byte
+	sigcode0       uintptr
+	sigcode1       uintptr
+	sigpc          uintptr
+	gopc           uintptr // 调用者PC/IP pc of go statement that created this goroutine
+	startpc        uintptr // 任务函数 pc of goroutine function
+	racectx        uintptr
+	waiting        *sudog  // sudog structures this g is waiting on (that have a valid elem ptr); in lock order
+	cgoCtxt        []uintptr      // cgo traceback context
+	labels         unsafe.Pointer // profiler labels
+	timer          *timer         // cached timer for time.Sleep
+	selectDone     uint32         // are we participating in a select and did someone win the race?
+	gcAssistBytes int64
+}
+</code></pre>
+
+<h3 id="2-m-p-g-是如何跑起来的-代码层面">2. M P G 是如何跑起来的 （代码层面）</h3>
+
+<p>在Go语言学习笔记 记录中已经记录了Go调度器的运行机制，这里是对该机制的代码层面的一个梳理</p>
+
+<h4 id="1-初始化">1. 初始化</h4>
+
+<p>初始化准备</p>
+
+<pre><code class="language-go">//调度器结构定义
+type schedt struct {
+	// accessed atomically. keep at top to ensure alignment on 32-bit systems.
+	goidgen  uint64
+	lastpoll uint64
+
+	lock mutex
+
+	// When increasing nmidle, nmidlelocked, nmsys, or nmfreed, be
+	// sure to call checkdead().
+
+	midle        muintptr // idle m's waiting for work
+	nmidle       int32    // number of idle m's waiting for work
+	nmidlelocked int32    // number of locked m's waiting for work
+	mnext        int64    // number of m's that have been created and next M ID
+	maxmcount    int32    // maximum number of m's allowed (or die)
+	nmsys        int32    // number of system m's not counted for deadlock
+	nmfreed      int64    // cumulative number of freed m's
+
+	ngsys uint32 // number of system goroutines; updated atomically
+
+	pidle      puintptr // idle p's
+	npidle     uint32
+	nmspinning uint32 // See &quot;Worker thread parking/unparking&quot; comment in proc.go.
+
+	// Global runnable queue.
+	runqhead guintptr
+	runqtail guintptr
+	runqsize int32
+
+	// Global cache of dead G's.
+	gflock       mutex
+	gfreeStack   *g
+	gfreeNoStack *g
+	ngfree       int32
+
+	// Central cache of sudog structs.
+	sudoglock  mutex
+	sudogcache *sudog
+
+	// Central pool of available defer structs of different sizes.
+	deferlock mutex
+	deferpool [5]*_defer
+
+	// freem is the list of m's waiting to be freed when their
+	// m.exited is set. Linked through m.freelink.
+	freem *m
+
+	gcwaiting  uint32 // gc is waiting to run
+	stopwait   int32
+	stopnote   note
+	sysmonwait uint32
+	sysmonnote note
+
+	// safepointFn should be called on each P at the next GC
+	// safepoint if p.runSafePointFn is set.
+	safePointFn   func(*p)
+	safePointWait int32
+	safePointNote note
+
+	profilehz int32 // cpu profiling rate
+
+	procresizetime int64 // nanotime() of last change to gomaxprocs
+	totaltime      int64 // ∫gomaxprocs dt up to procresizetime
+}
+
+//定义runtime下变量
+var sched schedt
+//定义p数组
+var allp [_MaxGomapxprocs+1]*p
+</code></pre>
+
+<h4 id="2-schedinit-初始化">2. schedinit 初始化</h4>
+
+<p>在这里会设置MaxMCount GOMAXPROCS</p>
+
+<pre><code class="language-go">//所有操作针对runtime下的变量 sched，sched可以理解为调度器
+func schedinit() {
+	_g_ := getg()
+	if raceenabled {
+		_g_.racectx, raceprocctx0 = raceinit()
+	}
+	//设定最大M数量，也就是可创建的系统线程数
+	sched.maxmcount = 10000
+	tracebackinit()
+	moduledataverify()
+	stackinit()
+	mallocinit()
+	mcommoninit(_g_.m) //初始化当前M
+	alginit()       // maps must not be used before this call
+	modulesinit()   // provides activeModules
+	typelinksinit() // uses maps, activeModules
+	itabsinit()     // uses activeModules
+
+	msigsave(_g_.m)
+	initSigmask = _g_.m.sigmask
+
+	goargs()
+	goenvs()
+	parsedebugvars()
+	gcinit() //GC初始化
+
+	sched.lastpoll = uint64(nanotime())
+	procs := ncpu
+	if n, ok := atoi32(gogetenv(&quot;GOMAXPROCS&quot;)); ok &amp;&amp; n &gt; 0 {
+		procs = n
+	}
+	//procresize 继续对sched 进行操作，调整P个数。可以查看该函数得知，此处的创建并不是全部分配新对象，而是进行去余补缺。并且该函数只有两处调用，sched为第一处，startTheWorld为第二处
+	if procresize(procs) != nil {
+		throw(&quot;unknown runnable goroutine during bootstrap&quot;)
+	}
+}
+</code></pre>
+
+<h4 id="3-通过procresize函数来初始化p">3. 通过procresize函数来初始化P</h4>
+
+<h4 id="4-创建g">4. 创建G</h4>
+
+<pre><code class="language-go">func newproc(siz int32, fn *funcval) {
+	argp := add(unsafe.Pointer(&amp;fn), sys.PtrSize)
+	pc := getcallerpc()
+	systemstack(func() {
+		newproc1(fn, (*uint8)(argp), siz, pc)
+	})
+}
+
+func newproc1(fn *funcval, argp *uint8, narg int32, callerpc uintptr) {
+	_g_ := getg()
+
+	if fn == nil {
+		_g_.m.throwing = -1 // do not dump full stacks
+		throw(&quot;go of nil func value&quot;)
+	}
+	_g_.m.locks++ // disable preemption because it can be holding p in a local var
+	//对齐参数+返回值 所需空间
+	siz := narg
+	siz = (siz + 7) &amp;^ 7
+	.
+	.
+	.
+	//从当前P中的G复用链表获取G对象
+	_p_ := _g_.m.p.ptr()
+	newg := gfget(_p_)
+	//获取失败，则新创建一个
+	if newg == nil {
+		//真正创建g函数，	// The minimum size of stack used by Go code	可以查到源码中 _StackMin = 2048
+		newg = malg(_StackMin)
+		casgstatus(newg, _Gidle, _Gdead)
+		allgadd(newg) // publishes with a g-&gt;status of Gdead so GC scanner doesn't look at uninitialized stack.
+	}
+	// 测试 G stack
+	if newg.stack.hi == 0 {
+		throw(&quot;newproc1: newg missing stack&quot;)
+	}
+	// 测试 G status，是否是一个无用的G对象
+	if readgstatus(newg) != _Gdead {
+		throw(&quot;newproc1: new g is not Gdead&quot;)
+	}
+	//计算所需空间，对齐
+	totalSize := 4*sys.RegSize + uintptr(siz) + sys.MinFrameSize // extra space in case of reads slightly beyond frame
+	totalSize += -totalSize &amp; (sys.SpAlign - 1)                  // align to spAlign
+	//缺定sp 和 参数入栈位置，即记录所在内存地址位置
+	sp := newg.stack.hi - totalSize
+	spArg := sp
+	if usesLR {
+		// caller's LR
+		*(*uintptr)(unsafe.Pointer(sp)) = 0
+		prepGoExitFrame(sp)
+		spArg += sys.MinFrameSize
+	}
+	if narg &gt; 0 {
+		memmove(unsafe.Pointer(spArg), unsafe.Pointer(argp), uintptr(narg))
+		// This is a stack-to-stack copy. If write barriers
+		// are enabled and the source stack is grey (the
+		// destination is always black), then perform a
+		// barrier copy. We do this *after* the memmove
+		// because the destination stack may have garbage on
+		// it.
+		//与GC相关，即垃圾回收的三色标记法
+		if writeBarrier.needed &amp;&amp; !_g_.m.curg.gcscandone {
+			f := findfunc(fn.fn)
+			stkmap := (*stackmap)(funcdata(f, _FUNCDATA_ArgsPointerMaps))
+			// We're in the prologue, so it's always stack map index 0.
+			bv := stackmapdata(stkmap, 0)
+			bulkBarrierBitmap(spArg, spArg, uintptr(narg), 0, bv.bytedata)
+		}
+	}
+	.
+	.
+	.
+	//设置唯一id
+	newg.goid = int64(_p_.goidcache)
+	_p_.goidcache++
+	.
+	.
+	.
+	//放入所在P的待运行队列，此处函数有挺多说法，见后文
+	runqput(_p_, newg, true)
+	//如果有空闲P，且没有M处于等待状态，并且当前不是main goroutine 时，尝试换新一个M出来干活
+	if atomic.Load(&amp;sched.npidle) != 0 &amp;&amp; atomic.Load(&amp;sched.nmspinning) == 0 &amp;&amp; mainStarted {
+		//唤醒函数
+		wakep()
+	}
+	_g_.m.locks--
+	if _g_.m.locks == 0 &amp;&amp; _g_.preempt { // restore the preemption request in case we've cleared it in newstack
+		_g_.stackguard0 = stackPreempt
+	}
+}
+
+</code></pre>
+
+<p>有几点可以记录一下</p>
+
+<blockquote>
+<ol>
+<li>G对象会被复用，除了P本地复用链表，还会在全局链表（MPG模型中有说道）中，在多个P之间共享</li>
+<li>getg函数 并没有在runtime中实现，通过注释可以看出，是在编译时被重写，getg()用来获取当前线程正在执行的协程g。该协程g被存储在线程局部存储中。在网上找到<a href="https://imkira.com/a22.html">https://imkira.com/a22.html</a> 中有涉及相关内容，代码中_g_ 与newg 是有区别的</li>
+<li>gfget获取status 等于 gdead状态的g，当goroutine执行完后会调用gfput放入P复用链表，不再粘贴代码</li>
+</ol>
+</blockquote>
+
+<h4 id="6-放入p队列执行">6. 放入p队列执行</h4>
+
+<pre><code class="language-go">// runqput tries to put g on the local runnable queue.
+// If next if false, runqput adds g to the tail of the runnable queue.
+// If next is true, runqput puts g in the _p_.runnext slot.
+// If the run queue is full, runnext puts g on the global queue.
+// Executed only by the owner P.
+func runqput(_p_ *p, gp *g, next bool) {
+	if randomizeScheduler &amp;&amp; next &amp;&amp; fastrand()%2 == 0 {
+		next = false
+	}
+
+	if next {
+	retryNext:
+		oldnext := _p_.runnext
+		//compare and swap，比较并交换，由汇编实现的原子操作，如果old与_p_.runnext 一致，则替换为guintptr(unsafe.Pointer(gp)，并返回1，如果不一致则不交换返回0，可以通过GDB调试去找到具体使用的哪个汇编文件
+		if !_p_.runnext.cas(oldnext, guintptr(unsafe.Pointer(gp))) {
+			goto retryNext
+		}
+		//这个判断标明原来runnext中没有值
+		if oldnext == 0 {
+			return
+		}
+		// Kick the old runnext out to the regular run queue.
+		gp = oldnext.ptr()
+	}
+
+retry:
+	//原子性操作载入
+	h := atomic.Load(&amp;_p_.runqhead) // load-acquire, synchronize with consumers
+	t := _p_.runqtail
+	if t-h &lt; uint32(len(_p_.runq)) {
+		_p_.runq[t%uint32(len(_p_.runq))].set(gp)
+		atomic.Store(&amp;_p_.runqtail, t+1) // store-release, makes the item available for consumption
+		return
+	}
+	//这一步有锁
+	if runqputslow(_p_, gp, h, t) {
+		return
+	}
+	// the queue is not full, now the put above must succeed
+	goto retry
+}
+</code></pre>
+
+<blockquote>
+<ol>
+<li>当一个G放入P中时，是先放入P的runnext中，如果runnext中没有值，则直接放入，作为下一个待执行任务优先执行，如果有一个G，则将原本runnext中的G对象挤入p.runq，然后新的对象放入runnext。这个部分的所有操作流程只在某一个p中执行，强调，这个操作是无锁操作。</li>
+<li>而当上面这个操作的过程中，发现所造P的G队列满的话，会将这个P中的G一次性移动半数进入调取器的全局队列runq中，并且包括当前G，调用函数为runqputslow()（从这里开始有锁，并因为有锁，所以叫slow）</li>
+</ol>
+</blockquote>
+
+<p>到现在，这里已经记录了调度器schedt的初始化，P的初始化，G的创建和一部分的调度，现在要记录下M的创建。</p>
+
+<h4 id="7-当使用了newproc1-创建了g对象之后-会使用wakep唤醒m来真正的执行">7. 当使用了newproc1 创建了G对象之后，会使用wakep唤醒M来真正的执行</h4>
+
+<pre><code class="language-go">// 唤醒片段
+func newproc1() {
+	.
+	.
+	.
+	//如果有空闲P，且没有M处于等待状态，并且当前不是main goroutine 时，尝试换新一个M出来干活
+	if atomic.Load(&amp;sched.npidle) != 0 &amp;&amp; atomic.Load(&amp;sched.nmspinning) == 0 &amp;&amp; mainStarted {
+		//唤醒函数
+		wakep()
+	}
+	.
+	.
+	.
+}	
+
+func wakep() {
+	// be conservative about spinning threads
+	//sched 中是否有正在自旋等待处理，cas处理逻辑是，&amp;sched.nmspinning 是否与0 相等，相等的话，将&amp;sched.nmspinning指向1，并返回1，如果不相等则不替换，返回0
+	if !atomic.Cas(&amp;sched.nmspinning, 0, 1) {
+		return
+	}
+	startm(nil, true)
+}
+
+//m开始运行，进入工作状态
+func startm(_p_ *p, spinning bool) {
+	//注意加锁
+	lock(&amp;sched.lock)
+	if _p_ == nil {
+		//没有指定p，尝试获取空闲p
+		_p_ = pidleget()
+		if _p_ == nil {
+			unlock(&amp;sched.lock)
+			if spinning {
+				// The caller incremented nmspinning, but there are no idle Ps,
+				// so it's okay to just undo the increment and give up.
+				// 上一步的调用中有增加自旋计数的操作，这里如果获取失败，则自减自旋计数
+				if int32(atomic.Xadd(&amp;sched.nmspinning, -1)) &lt; 0 {
+					throw(&quot;startm: negative nmspinning&quot;)
+				}
+			}
+			return
+		}
+	}
+	mp := mget()
+	//这里解锁
+	unlock(&amp;sched.lock)
+	if mp == nil {
+		var fn func()
+		if spinning {
+			// The caller incremented nmspinning, so set m.spinning in the new M.
+			// mspinning 是一个函数，用来设置当前G的自旋计数
+			//func mspinning() {
+				// startm's caller incremented nmspinning. Set the new M's spinning.
+			//	getg().m.spinning = true
+			//}		
+			fn = mspinning
+		}
+		newm(fn, _p_)
+		return
+	}
+	if mp.spinning {
+		throw(&quot;startm: m is spinning&quot;)
+	}
+	if mp.nextp != 0 {
+		throw(&quot;startm: m has p&quot;)
+	}
+	if spinning &amp;&amp; !runqempty(_p_) {
+		throw(&quot;startm: p has runnable gs&quot;)
+	}
+	// The caller incremented nmspinning, so set m.spinning in the new M.
+	mp.spinning = spinning
+	mp.nextp.set(_p_)
+	notewakeup(&amp;mp.park)
+}
+</code></pre>
+
+<p>注意m自身带有一个g0，用来隔离系统操作与用户逻辑，所以在前面的代码中会经常看到systemstack函数，该内容可以结合书本内容，细看TEXT runtime·systemstack（asm.arm64.s），对汇编一知半解，所以不展开记录。</p>
+
+<h4 id="8-当m在各种可能的场合都无法获取到g时-或者任务用时过长-系统调用阻塞等原因被剥夺p时-m进入休眠">8. 当m在各种可能的场合都无法获取到g时，或者任务用时过长，系统调用阻塞等原因被剥夺p时，m进入休眠。</h4>
+
+<pre><code class="language-go">func stopm() {
+	_g_ := getg()
+
+	if _g_.m.locks != 0 {
+		throw(&quot;stopm holding locks&quot;)
+	}
+	if _g_.m.p != 0 {
+		throw(&quot;stopm holding p&quot;)
+	}
+	if _g_.m.spinning {
+		throw(&quot;stopm spinning&quot;)
+	}
+
+retry:
+	lock(&amp;sched.lock)
+	mput(_g_.m)
+	unlock(&amp;sched.lock)
+	notesleep(&amp;_g_.m.park)
+	noteclear(&amp;_g_.m.park)
+	if _g_.m.helpgc != 0 {
+		// helpgc() set _g_.m.p and _g_.m.mcache, so we have a P.
+		gchelper()
+		// Undo the effects of helpgc().
+		_g_.m.helpgc = 0
+		_g_.m.mcache = nil
+		_g_.m.p = 0
+		goto retry
+	}
+	acquirep(_g_.m.nextp.ptr())
+	_g_.m.nextp = 0
+}
+
+</code></pre>
+
+<p>以上就是mpg各自的创建运行机制相关的代码</p>
+        </div>
+      </div>
+    </div>
+    <div class="footer">
+  
+  <p>Powered by <a href="http://gohugo.io">Hugo</a>. This theme—Slim—is open sourced on <a href="https://github.com/zhe/hugo-theme-slim">Github</a>.</p>
+  
+</div>
+
+  </div>
+  <script src="http://www.arthur-code-42.cc/js/slim.js"></script>
+  
+
+</body>
+
+</html>
