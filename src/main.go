@@ -1,18 +1,18 @@
 package main
 
 import (
+	"fmt"
 	"github.com/go-martini/martini"
 	"os"
-	"fmt"
 )
 
 var port string
 
-func init(){
-	name,_ := os.Hostname()
-	if name == "ArthurdeMacBook-Pro.local" || name == "bogon"{
+func init() {
+	name, _ := os.Hostname()
+	if name == "ArthurdeMacBook-Pro.local" || name == "bogon" {
 		port = ":8080"
-	}else{
+	} else {
 		port = ":80"
 	}
 	fmt.Println(name)
